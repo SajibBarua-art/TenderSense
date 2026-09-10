@@ -35,21 +35,43 @@ class IngestionPipeline:
         return list(self._adapters.keys())
 
     def ingest(self, source: str = "test_dataset", limit: Optional[int] = None) -> List[NormalizedTender]:
-        """Ingests tenders from a specific source or 'all' registered sources."""
+        """Ingests tenders from a specific source or 'all' registered sources.
+        
+        When source='all', distributes the quota evenly (half-and-half round-robin)
+        across live portals (e.g. World Bank STEP and e-GP Bangladesh).
+        Defaults to limit=20 if not specified.
+        """
         source_key = source.lower()
-        limit_val = limit if limit is not None else 100
+        limit_val = limit if limit is not None else 20
 
         if source_key == "all":
-            all_tenders: List[NormalizedTender] = []
-            for key, adapter in self._adapters.items():
-                if key == "test_dataset":
-                    continue  # Skip test dataset when pulling live/all portals
+            # Collect results from all external/live feeds (exclude test_dataset)
+            active_feeds = [k for k in self._adapters.keys() if k != "test_dataset"]
+            feed_results: Dict[str, List[NormalizedTender]] = {}
+
+            # Fetch enough from each feed to allow balanced interleaving
+            fetch_per_feed = max(5, limit_val)
+            for key in active_feeds:
+                adapter = self._adapters[key]
                 try:
-                    tenders = adapter.fetch_tenders(limit=limit_val)
-                    all_tenders.extend(tenders)
+                    tenders = adapter.fetch_tenders(limit=fetch_per_feed)
+                    if tenders:
+                        feed_results[key] = tenders
                 except Exception as e:
                     logger.error("Failed pulling from %s: %s", key, e)
-            return all_tenders[:limit_val]
+
+            # Round-robin / interleaved fair distribution (half-and-half across portals)
+            balanced_tenders: List[NormalizedTender] = []
+            max_len = max((len(t_list) for t_list in feed_results.values()), default=0)
+
+            for i in range(max_len):
+                for key in feed_results:
+                    if i < len(feed_results[key]):
+                        balanced_tenders.append(feed_results[key][i])
+                        if len(balanced_tenders) >= limit_val:
+                            return balanced_tenders
+
+            return balanced_tenders[:limit_val]
 
         if source_key not in self._adapters:
             raise ValueError(f"Unknown ingestion source '{source}'. Available: {list(self._adapters.keys())}")
