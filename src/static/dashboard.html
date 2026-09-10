@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TenderSense | Intelligent Procurement Decision Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-base: #090D16;
+            --bg-surface: rgba(17, 24, 39, 0.7);
+            --bg-surface-hover: rgba(31, 41, 55, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glass-glow: rgba(99, 102, 241, 0.25);
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --color-bid: #10B981;
+            --color-bid-bg: rgba(16, 185, 129, 0.12);
+            --color-hold: #F59E0B;
+            --color-hold-bg: rgba(245, 158, 11, 0.12);
+            --color-skip: #EF4444;
+            --color-skip-bg: rgba(239, 68, 68, 0.12);
+            --color-accent: #6366F1;
+            --color-accent-glow: rgba(99, 102, 241, 0.35);
+            --color-cyan: #06B6D4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.15), transparent 35%),
+                radial-gradient(circle at 85% 20%, rgba(6, 182, 212, 0.12), transparent 30%),
+                radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.08), transparent 40%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* Glass Card Utility */
+        .glass-panel {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+            transition: all 0.25s ease;
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+
+        /* Layout */
+        .app-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px 32px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-glass);
+            margin-bottom: 28px;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366F1 0%, #06B6D4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 0 20px var(--color-accent-glow);
+        }
+
+        .brand-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #FFFFFF, #CBD5E1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            font-size: 12px;
+            font-weight: 600;
+            color: #34D399;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 10px #10B981;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+            color: #FFF;
+            box-shadow: 0 4px 14px var(--color-accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--color-accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border-color: var(--border-glass);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .kpi-card {
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-start, #6366F1), var(--accent-end, #06B6D4));
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #FFF;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .kpi-subtext {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Interactive Controls Bar */
+        .control-bar {
+            padding: 18px 24px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .control-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .select-input, .number-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-glass);
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .select-input:focus, .number-input:focus {
+            border-color: var(--color-accent);
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .chart-card {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .chart-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #FFF;
+        }
+
+        .chart-canvas-container {
+            position: relative;
+            flex: 1;
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Shortlist Table Section */
+        .table-section {
+            padding: 24px;
+        }
+
+        .table-header-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-glass);
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .filter-chip.active {
+            background: var(--color-accent);
+            color: #FFF;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 12px var(--color-accent-glow);
+        }
+
+        .tender-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .tender-table th {
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .tender-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        .tender-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-bid { background: var(--color-bid-bg); color: var(--color-bid); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-hold { background: var(--color-hold-bg); color: var(--color-hold); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-skip { background: var(--color-skip-bg); color: var(--color-skip); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .grade-pill {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .grade-S { background: rgba(139, 92, 246, 0.2); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.4); }
+        .grade-A { background: rgba(59, 130, 246, 0.2); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .grade-B { background: rgba(6, 182, 212, 0.2); color: #22D3EE; border: 1px solid rgba(6, 182, 212, 0.4); }
+        .grade-C { background: rgba(100, 116, 139, 0.2); color: #94A3B8; border: 1px solid rgba(100, 116, 139, 0.4); }
+
+        .score-bar-bg {
+            width: 80px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #6366F1, #06B6D4);
+        }
+
+        .tender-link {
+            color: #60A5FA;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .tender-link:hover {
+            color: #93C5FD;
+            text-decoration: underline;
+        }
+
+        .btn-view {
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            color: #A5B4FC;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-view:hover {
+            background: rgba(99, 102, 241, 0.25);
+            color: #FFF;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #0F172A;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            max-width: 680px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            animation: modal-pop 0.2s ease-out;
+        }
+
+        @keyframes modal-pop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: #FFF; }
+
+        .ai-summary-box {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: #E2E8F0;
+        }
+
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #FFF;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="brand-box">
+                <div class="brand-badge">T</div>
+                <div class="brand-text">
+                    <h1>TenderSense Executive Command</h1>
+                    <p>BracIT Services Limited &bull; Automated Procurement Intelligence</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="status-pill">
+                    <span class="status-dot"></span>
+                    <span id="liveStatusText">SQLite Live &bull; Feeds Synchronized</span>
+                </div>
+                <a href="/docs" target="_blank" class="btn-action btn-secondary">API Docs</a>
+                <button onclick="fetchShortlistData()" class="btn-action btn-secondary" title="Reload fresh data">
+                    &#x21bb; Refresh
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Metric Cards -->
+        <section class="kpi-grid">
+            <div class="glass-panel kpi-card" style="--accent-start: #3B82F6; --accent-end: #06B6D4;">
+                <div class="kpi-label">
+                    <span>TOTAL MONITORED</span>
+                    <span>&#x1F4CA;</span>
+                </div>
+                <div class="kpi-value" id="kpiTotal">--</div>
+                <div class="kpi-subtext">Across e-GP, World Bank & STEP feeds</div>
+            </div>
+
+            <div class="glass-panel kpi-card" style="--accent-start: #10B981; --accent-end: #059669;">
+                <div class="kpi-label">
+                    <span>BID OPPORTUNITIES</span>
+                    <span>&#x2705;</span>
+                </div>
+                <div class="kpi-value" style="color: #34D399;" id="kpiBids">--</div>
+                <div class="kpi-subtext">High priority (100% Eligible + Grade S/A)</div>
+            </div>
+
+            <div class="glass-panel kpi-card" style="--accent-start: #8B5CF6; --accent-end: #6366F1;">
+                <div class="kpi-label">
+                    <span>AVG SEMANTIC MATCH</span>
+                    <span>&#x2728;</span>
+                </div>
+                <div class="kpi-value" id="kpiAvgScore">--</div>
+                <div class="kpi-subtext">Cosine alignment against BracIT Profile</div>
+            </div>
+
+            <div class="glass-panel kpi-card" style="--accent-start: #F59E0B; --accent-end: #D97706;">
+                <div class="kpi-label">
+                    <span>EVALUATION RUNS</span>
+                    <span>&#x1F4BE;</span>
+                </div>
+                <div class="kpi-value" id="kpiRuns">--</div>
+                <div class="kpi-subtext">Persistent history saved in SQLite</div>
+            </div>
+        </section>
+
+        <!-- Pipeline Execution Controller -->
+        <section class="glass-panel control-bar">
+            <div class="control-group">
+                <span class="control-label">&#x2699;&#xFE0F; Trigger Pipeline:</span>
+                <select id="sourceSelect" class="select-input">
+                    <option value="all">All Portals (Fair Distribution)</option>
+                    <option value="world_bank">World Bank STEP (Live)</option>
+                    <option value="egp_bd">e-GP Bangladesh (Live)</option>
+                    <option value="test_dataset">Test Benchmark (40 Tenders)</option>
+                </select>
+                <select id="limitSelect" class="select-input">
+                    <option value="5">Limit: 5 Tenders</option>
+                    <option value="10" selected>Limit: 10 Tenders</option>
+                    <option value="20">Limit: 20 Tenders</option>
+                    <option value="40">Limit: 40 Tenders</option>
+                </select>
+                <button id="btnRunPipeline" onclick="triggerPipelineRun()" class="btn-action btn-primary">
+                    <span>Execute Pipeline</span>
+                </button>
+            </div>
+            <div class="control-group" id="runStatusArea" style="font-size: 13px; color: var(--text-secondary);">
+                <!-- Dynamic feedback text -->
+            </div>
+        </section>
+
+        <!-- Visual Charts Grid -->
+        <section class="charts-grid">
+            <!-- Donut Chart: Recommendations -->
+            <div class="glass-panel chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Bid Recommendation Split</h3>
+                </div>
+                <div class="chart-canvas-container">
+                    <canvas id="chartRecommendations"></canvas>
+                </div>
+            </div>
+
+            <!-- Bar Chart: Match Grades -->
+            <div class="glass-panel chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Quality Match Grades (S &bull; A &bull; B &bull; C)</h3>
+                </div>
+                <div class="chart-canvas-container">
+                    <canvas id="chartGrades"></canvas>
+                </div>
+            </div>
+
+            <!-- Donut/Bar Chart: Urgency Deadlines -->
+            <div class="glass-panel chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Deadline Urgency Distribution</h3>
+                </div>
+                <div class="chart-canvas-container">
+                    <canvas id="chartUrgency"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shortlist Table Section -->
+        <section class="glass-panel table-section">
+            <div class="table-header-box">
+                <div>
+                    <h2 style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: #FFF; margin-bottom: 4px;">
+                        Daily Evaluated Shortlist
+                    </h2>
+                    <p style="font-size: 13px; color: var(--text-secondary);">
+                        Deterministic hard rules filtering + AI semantic matching & briefings
+                    </p>
+                </div>
+                <div class="filter-chips">
+                    <button class="filter-chip active" onclick="setFilter('ALL')">All Tenders</button>
+                    <button class="filter-chip" onclick="setFilter('BID')">BID Opportunities</button>
+                    <button class="filter-chip" onclick="setFilter('HOLD')">HOLD</button>
+                    <button class="filter-chip" onclick="setFilter('CRITICAL')">Critical (<= 3 Days)</button>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="tender-table">
+                    <thead>
+                        <tr>
+                            <th>Grade</th>
+                            <th>Decision</th>
+                            <th>Tender Notice & Organization</th>
+                            <th>Portal</th>
+                            <th>Deadline & Urgency</th>
+                            <th>AI Match Score</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tenderTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 36px;">
+                                Loading tender evaluation data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="tenderModal" class="modal-overlay" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <span id="modalGrade" class="badge badge-bid" style="margin-bottom: 6px;">BID &bull; Grade S</span>
+                    <h3 id="modalTitle" style="font-family: 'Outfit'; font-size: 18px; font-weight: 700; color: #FFF; margin-top: 4px;">Tender Title</h3>
+                    <p id="modalSub" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">ID: WB-12345 &bull; Source Portal</p>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <h4 style="font-size: 12px; text-transform: uppercase; color: #A5B4FC; font-weight: 700; margin-bottom: 8px;">
+                    &#x1F916; AI Executive Briefing (Open-Source LLM)
+                </h4>
+                <div id="modalSummary" class="ai-summary-box"></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 10px; border: 1px solid var(--border-glass);">
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Hard Rules Eligibility</div>
+                    <div id="modalEligibility" style="font-weight: 600; font-size: 14px; margin-top: 4px;">Eligible</div>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 10px; border: 1px solid var(--border-glass);">
+                    <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Semantic Similarity</div>
+                    <div id="modalScore" style="font-weight: 600; font-size: 14px; margin-top: 4px; color: #22D3EE;">0.85 (High)</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;">
+                    Aligned BracIT Services & Capabilities
+                </h4>
+                <div id="modalServices" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+            </div>
+
+            <div style="text-align: right; border-top: 1px solid var(--border-glass); padding-top: 16px;">
+                <a id="modalOfficialLink" href="#" target="_blank" class="btn-action btn-primary">
+                    Navigate to Official Portal &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard JavaScript Logic -->
+    <script>
+        let allTendersData = [];
+        let activeFilter = 'ALL';
+        let chartRecInstance = null;
+        let chartGradesInstance = null;
+        let chartUrgencyInstance = null;
+
+        // Initialize on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchAnalyticsOverview();
+            fetchChartData();
+            fetchShortlistData();
+        });
+
+        // 1. Fetch KPI Overview
+        async function fetchAnalyticsOverview() {
+            try {
+                const res = await fetch('/api/v1/analytics/overview');
+                if (!res.ok) return;
+                const data = await res.json();
+                document.getElementById('kpiTotal').innerText = data.total_tenders_monitored || '--';
+                document.getElementById('kpiBids').innerText = data.recommended_bids || '0';
+                document.getElementById('kpiAvgScore').innerText = (data.average_semantic_score ? data.average_semantic_score.toFixed(2) : '--');
+                document.getElementById('kpiRuns').innerText = data.total_pipeline_runs || '0';
+            } catch (e) {
+                console.error("Failed to load KPIs:", e);
+            }
+        }
+
+        // 2. Fetch & Render Charts
+        async function fetchChartData() {
+            try {
+                const res = await fetch('/api/v1/analytics/charts');
+                if (!res.ok) return;
+                const data = await res.json();
+                renderRecommendationChart(data.recommendation_donut);
+                renderGradeChart(data.grade_bar);
+                renderUrgencyChart(data.urgency_breakdown);
+            } catch (e) {
+                console.error("Failed to load chart data:", e);
+            }
+        }
+
+        function renderRecommendationChart(chartData) {
+            const ctx = document.getElementById('chartRecommendations').getContext('2d');
+            if (chartRecInstance) chartRecInstance.destroy();
+
+            chartRecInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        data: chartData.data,
+                        backgroundColor: chartData.colors,
+                        borderColor: '#0F172A',
+                        borderWidth: 3,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94A3B8', boxWidth: 12, padding: 12, font: { size: 11, family: 'Inter' } }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function renderGradeChart(chartData) {
+            const ctx = document.getElementById('chartGrades').getContext('2d');
+            if (chartGradesInstance) chartGradesInstance.destroy();
+
+            chartGradesInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Grade S', 'Grade A', 'Grade B', 'Grade C'],
+                    datasets: [{
+                        label: 'Tenders',
+                        data: chartData.data,
+                        backgroundColor: chartData.colors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 11 } } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748B', stepSize: 1, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function renderUrgencyChart(chartData) {
+            const ctx = document.getElementById('chartUrgency').getContext('2d');
+            if (chartUrgencyInstance) chartUrgencyInstance.destroy();
+
+            chartUrgencyInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        data: chartData.data,
+                        backgroundColor: chartData.colors,
+                        borderColor: '#0F172A',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94A3B8', boxWidth: 12, padding: 12, font: { size: 11, family: 'Inter' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. Fetch Shortlist Table Data
+        async function fetchShortlistData() {
+            try {
+                const res = await fetch('/api/v1/pipeline/shortlist');
+                if (!res.ok) return;
+                const data = await res.json();
+                allTendersData = data.tenders || [];
+                renderTable();
+            } catch (e) {
+                console.error("Failed to load shortlist table:", e);
+            }
+        }
+
+        function setFilter(filter) {
+            activeFilter = filter;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tenderTableBody');
+            tbody.innerHTML = '';
+
+            let filtered = allTendersData.filter(item => {
+                if (activeFilter === 'ALL') return true;
+                if (activeFilter === 'BID') return item.recommendation === 'BID';
+                if (activeFilter === 'HOLD') return item.recommendation === 'HOLD';
+                if (activeFilter === 'CRITICAL') return item.urgency_flag === 'CRITICAL';
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 36px;">No tenders matching filter '${activeFilter}'.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const tender = item.tender;
+                const score = (item.semantic_result?.similarity_score || 0);
+                const scorePct = Math.round(score * 100);
+
+                let badgeClass = 'badge-skip';
+                if (item.recommendation === 'BID') badgeClass = 'badge-bid';
+                else if (item.recommendation === 'HOLD') badgeClass = 'badge-hold';
+
+                let urgencyColor = '#10B981';
+                if (item.urgency_flag === 'CRITICAL') urgencyColor = '#EF4444';
+                else if (item.urgency_flag === 'URGENT') urgencyColor = '#F59E0B';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <span class="grade-pill grade-${item.match_grade}">${item.match_grade}</span>
+                    </td>
+                    <td>
+                        <span class="badge ${badgeClass}">${item.recommendation}</span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: #FFF; margin-bottom: 3px;">
+                            ${tender.title}
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            ${tender.issuing_entity || tender.country_name || 'N/A'} &bull; <span style="font-family: monospace;">${tender.tender_id}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-size: 12px; color: var(--text-secondary);">${tender.source_portal}</span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500; color: #E2E8F0;">${item.closing_date || 'N/A'}</div>
+                        <div style="font-size: 11px; color: ${urgencyColor}; font-weight: 600;">
+                            ${item.days_until_deadline > 0 ? item.days_until_deadline + ' days left' : 'Expired'} (${item.urgency_flag})
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <div class="score-bar-bg">
+                                <div class="score-bar-fill" style="width: ${scorePct}%;"></div>
+                            </div>
+                            <span style="font-weight: 600; font-size: 12px; color: #22D3EE;">${score.toFixed(2)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-view" onclick='openModal(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                            Briefing &rarr;
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 4. Modal Handler
+        function openModal(item) {
+            const modal = document.getElementById('tenderModal');
+            document.getElementById('modalTitle').innerText = item.tender.title;
+            document.getElementById('modalSub').innerText = `${item.tender.tender_id} • ${item.tender.source_portal} • Closing: ${item.closing_date || 'N/A'}`;
+            
+            const badge = document.getElementById('modalGrade');
+            badge.className = `badge badge-${item.recommendation.toLowerCase()}`;
+            badge.innerText = `${item.recommendation} • Grade ${item.match_grade}`;
+
+            document.getElementById('modalSummary').innerText = item.ai_summary || "No advisory briefing generated.";
+            
+            const eligEl = document.getElementById('modalEligibility');
+            if (item.is_eligible) {
+                eligEl.innerText = "PASSED (Fully Compliant)";
+                eligEl.style.color = "#34D399";
+            } else {
+                const reasons = item.eligibility_evaluation?.failure_reasons || [];
+                eligEl.innerText = "INELIGIBLE (" + (reasons.join(', ') || 'Requirements unmet') + ")";
+                eligEl.style.color = "#F87171";
+            }
+
+            document.getElementById('modalScore').innerText = `${item.semantic_result.similarity_score.toFixed(2)} (${item.semantic_result.domain_alignment})`;
+
+            const servicesBox = document.getElementById('modalServices');
+            servicesBox.innerHTML = '';
+            (item.semantic_result.matched_services || []).forEach(s => {
+                const sp = document.createElement('span');
+                sp.style.cssText = "background: rgba(99, 102, 241, 0.15); color: #C7D2FE; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; border: 1px solid rgba(99, 102, 241, 0.3);";
+                sp.innerText = s;
+                servicesBox.appendChild(sp);
+            });
+
+            const linkBtn = document.getElementById('modalOfficialLink');
+            if (item.tender.source_url) {
+                linkBtn.href = item.tender.source_url;
+                linkBtn.style.display = 'inline-flex';
+            } else {
+                linkBtn.style.display = 'none';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('tenderModal').style.display = 'none';
+        }
+
+        function closeModalOnBackdrop(e) {
+            if (e.target.id === 'tenderModal') closeModal();
+        }
+
+        // 5. Trigger Pipeline Execution
+        async function triggerPipelineRun() {
+            const btn = document.getElementById('btnRunPipeline');
+            const statusArea = document.getElementById('runStatusArea');
+            const source = document.getElementById('sourceSelect').value;
+            const limit = parseInt(document.getElementById('limitSelect').value, 10);
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> <span>Processing...</span>`;
+            statusArea.innerText = `Pulling and scoring tenders from '${source}'...`;
+
+            try {
+                const resp = await fetch('/api/v1/pipeline/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        source: source,
+                        limit: limit,
+                        save_to_shortlist: true
+                    })
+                });
+
+                if (!resp.ok) throw new Error("Server returned " + resp.status);
+                const data = await resp.json();
+                
+                statusArea.innerText = `Completed: ${data.total_processed} tenders evaluated in ${data.duration_seconds}s.`;
+                statusArea.style.color = "#34D399";
+
+                // Refresh UI components
+                await fetchAnalyticsOverview();
+                await fetchChartData();
+                await fetchShortlistData();
+            } catch (err) {
+                statusArea.innerText = `Pipeline failed: ${err.message}`;
+                statusArea.style.color = "#F87171";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Execute Pipeline</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

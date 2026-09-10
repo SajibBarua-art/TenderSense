@@ -27,6 +27,16 @@ async def run_pipeline(request: PipelineRunRequest):
         )
         if request.save_to_shortlist:
             _LATEST_SHORTLIST = shortlist
+            try:
+                from src.db.repository import db_repository
+                db_repository.save_pipeline_run(
+                    shortlist=shortlist,
+                    source=request.source,
+                    duration_seconds=round(time.perf_counter() - start_time, 3)
+                )
+            except Exception as dbe:
+                import logging
+                logging.getLogger(__name__).warning("Could not persist pipeline run to database: %s", dbe)
 
         duration = time.perf_counter() - start_time
         return PipelineRunResponse(

@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     environment: str = Field(default="development", description="Environment: development, staging, production")
     debug: bool = Field(default=False, description="Debug mode")
+    database_url: str = Field(default="sqlite:///./tendersense.db", description="Database connection URL")
 
     # API Keys & Open-Source Free Providers
     openai_api_key: Optional[str] = Field(default=None, description="OpenAI API Key (Paid)")

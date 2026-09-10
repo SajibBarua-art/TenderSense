@@ -5,9 +5,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config.settings import settings
+from src.api.routes_analytics import router as analytics_router
 from src.api.routes_pipeline import router as pipeline_router
 from src.api.routes_tenders import router as tenders_router
 from src.api.routes_profile import router as profile_router
+from src.db.session import init_db
 from src.orchestration.engine import orchestrator
 
 # Configure standard logging
@@ -23,6 +25,9 @@ async def lifespan(app: FastAPI):
     """Application lifespan context for startup and shutdown routines."""
     logger.info("Initializing TenderSense Backend...")
     try:
+        # Initialize SQLite database schema
+        init_db()
+
         # Pre-warm BracIT profile and vector space
         profile = orchestrator.get_profile()
         logger.info(
@@ -33,7 +38,7 @@ async def lifespan(app: FastAPI):
             len(profile.certifications)
         )
     except Exception as e:
-        logger.error("Failed to load initial profile: %s", e)
+        logger.error("Failed during application startup: %s", e)
 
     yield
     logger.info("TenderSense Backend shutting down.")
@@ -62,8 +67,21 @@ app.add_middleware(
 
 # Mount API routers
 app.include_router(pipeline_router, prefix="/api/v1")
+app.include_router(analytics_router, prefix="/api/v1")
 app.include_router(tenders_router, prefix="/api/v1")
 app.include_router(profile_router, prefix="/api/v1")
+
+
+@app.get("/dashboard", tags=["Visual Dashboard"])
+async def get_dashboard():
+    """Serves the interactive TenderSense Executive Command Dashboard."""
+    from pathlib import Path
+    from fastapi.responses import HTMLResponse
+    dashboard_path = Path("src/static/dashboard.html")
+    if dashboard_path.exists():
+        with open(dashboard_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Dashboard file not found</h1>", status_code=404)
 
 
 @app.get("/", tags=["Health & Status"])
@@ -73,6 +91,7 @@ async def root():
         "service": settings.app_name,
         "version": settings.app_version,
         "status": "operational",
+        "dashboard_url": "/dashboard",
         "docs_url": "/docs",
         "api_v1": "/api/v1"
     }

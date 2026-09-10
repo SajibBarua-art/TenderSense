@@ -36,10 +36,36 @@ def main():
         help="Output format (default: table)"
     )
 
+    run_parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Persist evaluated tenders and run statistics to SQLite database"
+    )
+
     # Command: profile
     subparsers.add_parser("profile", help="Display BracIT capability profile summary")
 
+    # Command: history
+    subparsers.add_parser("history", help="List recent pipeline execution runs from SQLite database")
+
     args = parser.parse_args()
+
+    if args.command == "history":
+        from src.db.repository import db_repository
+        runs = db_repository.get_recent_runs(limit=10)
+        if not runs:
+            print("\n[TenderSense] No recorded runs found in database.\n")
+            return
+        print(f"\n{'='*75}")
+        print(f"  TENDERSENSE PIPELINE EXECUTION HISTORY (SQLite)")
+        print(f"{'='*75}")
+        print(f"{'RUN ID':<32} {'SOURCE':<14} {'TOTAL':<7} {'BIDS':<6} {'DURATION':<9} {'DATE'}")
+        print(f"{'-'*75}")
+        for r in runs:
+            created = r['created_at'][:19].replace('T', ' ') if r['created_at'] else 'N/A'
+            print(f"{r['run_id']:<32} {r['source']:<14} {r['total_evaluated']:<7} {r['bid_count']:<6} {r['duration_seconds']:<8.2f}s {created}")
+        print(f"{'='*75}\n")
+        return
 
     if args.command == "profile":
         profile = orchestrator.get_profile()
@@ -69,6 +95,12 @@ def main():
     start = time.perf_counter()
     shortlist = orchestrator.run_pipeline(source=source, limit=limit)
     duration = time.perf_counter() - start
+
+    save_db = getattr(args, "save", False)
+    if save_db:
+        from src.db.repository import db_repository
+        saved_run = db_repository.save_pipeline_run(shortlist=shortlist, source=source, duration_seconds=duration)
+        print(f"[TenderSense] Saved run '{saved_run.run_id}' to SQLite database.")
 
     if output_format == "table":
         print(shortlist_formatter.format_as_table(shortlist))
