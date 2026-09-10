@@ -15,6 +15,7 @@ htmlcov/
 
 # Environment Variables
 .env
+.env.example
 
 # IDEs
 .idea/
