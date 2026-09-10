@@ -1,0 +1,248 @@
+{
+  "company_name": "BracIT Services Limited",
+  "tagline": "Empowering Global Growth Through Technology",
+  "country_of_incorporation": "Bangladesh",
+  "operating_regions": [
+    "Bangladesh",
+    "South Asia",
+    "East Asia And Pacific",
+    "Sub-Saharan Africa",
+    "Global"
+  ],
+  "annual_turnover_bdt": 650000000.0,
+  "annual_turnover_usd": 5416667.0,
+  "years_in_business": 15,
+  "total_staff": 250,
+  "services": [
+    {
+      "service_id": "SRV-01",
+      "name": "Custom Software Engineering & Architecture",
+      "description": "Full-lifecycle enterprise software engineering, scalable backend microservices, resilient APIs, and mission-critical transaction systems.",
+      "keywords": ["software engineering", "microservices", "API development", "backend", "web application", "enterprise systems", "python", "java", "node.js"]
+    },
+    {
+      "service_id": "SRV-02",
+      "name": "Enterprise Cloud Solutions & DevOps",
+      "description": "Architecting, deploying, and maintaining resilient multi-cloud infrastructures on AWS, Azure, and Google Cloud with Kubernetes containerization, CI/CD pipelines, and 24/7 SRE monitoring.",
+      "keywords": ["cloud", "devops", "kubernetes", "docker", "aws", "azure", "ci/cd", "infrastructure as code", "terraform"]
+    },
+    {
+      "service_id": "SRV-03",
+      "name": "Data Engineering & Artificial Intelligence",
+      "description": "Big data pipelines, data warehousing, predictive machine learning models, natural language processing, computer vision, and executive business intelligence dashboards.",
+      "keywords": ["data engineering", "ai", "machine learning", "business intelligence", "analytics", "nlp", "llm", "etl", "dashboards"]
+    },
+    {
+      "service_id": "SRV-04",
+      "name": "ERP & Core MIS Implementations",
+      "description": "Turnkey enterprise resource planning (ERP), human resource management systems (HRMS), financial accounting software, and nationwide management information systems (MIS).",
+      "keywords": ["erp", "mis", "financial management", "hrms", "inventory", "supply chain", "database", "reporting"]
+    },
+    {
+      "service_id": "SRV-05",
+      "name": "Cybersecurity Operations & Compliance Auditing",
+      "description": "Vulnerability assessment and penetration testing (VAPT), security operations center (SOC) monitoring, ISO 27001 compliance auditing, identity and access management (IAM), and data privacy frameworks.",
+      "keywords": ["cybersecurity", "vapt", "penetration testing", "soc", "iso 27001", "iam", "encryption", "network security", "compliance"]
+    },
+    {
+      "service_id": "SRV-06",
+      "name": "e-Governance & Public Sector Citizen Services",
+      "description": "Design and rollout of high-capacity digital public infrastructure (DPI), citizen service delivery portals, digital identity authentication, and government payment gateways.",
+      "keywords": ["egovernance", "public sector", "citizen portal", "digital government", "g2c", "national id", "single sign-on"]
+    },
+    {
+      "service_id": "SRV-07",
+      "name": "Mobile Applications & Omnichannel Platforms",
+      "description": "Cross-platform iOS and Android mobile solutions with offline-first synchronization, secure biometric authentication, and field-worker telemetry.",
+      "keywords": ["mobile app", "ios", "android", "flutter", "react native", "offline-first", "field data collection"]
+    }
+  ],
+  "past_projects": [
+    {
+      "project_id": "PRJ-01",
+      "name": "BRAC Microfinance Digital Banking App & Core Connector",
+      "client": "BRAC International",
+      "client_type": "NGO/Fintech",
+      "description": "Engineered omnichannel mobile banking and branchless banking system serving 7 million microfinance borrowers across 2,400 branches with biometric authentication and real-time ledger settlement.",
+      "domain": "Fintech & Microfinance",
+      "technologies": ["Flutter", "FastAPI", "PostgreSQL", "Kafka", "Docker"],
+      "value_bdt": 25000000.0,
+      "value_usd": 208333.0,
+      "completion_year": 2024,
+      "duration_months": 18
+    },
+    {
+      "project_id": "PRJ-02",
+      "name": "National Health Logistics Management Information System (e-LMIS)",
+      "client": "Directorate General of Family Planning (DGFP), Bangladesh",
+      "client_type": "Government",
+      "description": "Delivered a nationwide supply chain and commodity tracking system for 4,000+ public healthcare clinics ensuring zero stock-outs for essential medicines and vaccines.",
+      "domain": "Healthcare & Supply Chain",
+      "technologies": ["Python", "Django", "PostgreSQL", "Redis", "Leaflet GIS"],
+      "value_bdt": 45000000.0,
+      "value_usd": 375000.0,
+      "completion_year": 2023,
+      "duration_months": 24
+    },
+    {
+      "project_id": "PRJ-03",
+      "name": "e-Government Citizen Portal Service Bus & Interoperability Layer",
+      "client": "Aspire to Innovate (a2i), ICT Division, Bangladesh",
+      "client_type": "Government",
+      "description": "Built high-throughput government service bus integrating 18 ministries, managing 3.5 million daily transactions with single-sign-on (SSO) and audit verification.",
+      "domain": "e-Governance & Public Sector",
+      "technologies": ["Go", "Node.js", "RabbitMQ", "Kubernetes", "OAuth2/OpenID"],
+      "value_bdt": 60000000.0,
+      "value_usd": 500000.0,
+      "completion_year": 2024,
+      "duration_months": 20
+    },
+    {
+      "project_id": "PRJ-04",
+      "name": "Humanitarian Supply Chain & Refugee Assistance Tracking Platform",
+      "client": "UNHCR & BRAC Humanitarian Crisis Management Programme",
+      "client_type": "Multilateral / NGO",
+      "description": "Designed offline-capable biometric identity and ration distribution mobile software used in Cox's Bazar refugee settlements for 850,000 beneficiaries.",
+      "domain": "Humanitarian & Logistics",
+      "technologies": ["React Native", "SQLite", "Python", "AWS", "BioServer"],
+      "value_bdt": 35000000.0,
+      "value_usd": 291667.0,
+      "completion_year": 2023,
+      "duration_months": 14
+    },
+    {
+      "project_id": "PRJ-05",
+      "name": "Enterprise ERP Modernization & Financial Management Suite",
+      "client": "BRAC Social Enterprises & Aarong",
+      "client_type": "Enterprise",
+      "description": "Customized end-to-end ERP for procurement, inventory accounting, supply chain, and retail POS across 42 retail locations and 12 production centers.",
+      "domain": "ERP & Enterprise Software",
+      "technologies": ["Java Spring Boot", "Angular", "PostgreSQL", "Elasticsearch"],
+      "value_bdt": 50000000.0,
+      "value_usd": 416667.0,
+      "completion_year": 2025,
+      "duration_months": 22
+    },
+    {
+      "project_id": "PRJ-06",
+      "name": "Financial Messaging & Anti-Money Laundering Gateway",
+      "client": "Bangladesh Financial Intelligence Unit / Consortium",
+      "client_type": "Financial Regulatory",
+      "description": "Developed suspicious transaction reporting engine with real-time sanctions screening, automated anomaly detection, and ISO 20022 message compliance.",
+      "domain": "Cybersecurity & RegTech",
+      "technologies": ["Python", "PyTorch", "Kafka", "PostgreSQL", "Docker"],
+      "value_bdt": 40000000.0,
+      "value_usd": 333333.0,
+      "completion_year": 2024,
+      "duration_months": 16
+    },
+    {
+      "project_id": "PRJ-07",
+      "name": "Agricultural Subsidy & Farmer Digital Registry Management System",
+      "client": "Department of Agricultural Extension (DAE), Ministry of Agriculture",
+      "client_type": "Government",
+      "description": "Digitized 12 million farmer profiles with GIS mapping, crop yield monitoring, and direct fertilizer subsidy disbursement verification.",
+      "domain": "AgriTech & GovTech",
+      "technologies": ["Vue.js", "Python FastAPI", "PostGIS", "PostgreSQL", "GCP"],
+      "value_bdt": 38000000.0,
+      "value_usd": 316667.0,
+      "completion_year": 2023,
+      "duration_months": 15
+    },
+    {
+      "project_id": "PRJ-08",
+      "name": "Climate Vulnerability & Early Warning Information System",
+      "client": "Department of Disaster Management, Bangladesh",
+      "client_type": "Government",
+      "description": "Satellite telemetry data ingestion, flood forecasting models, automated SMS cyclone warning broadcast system reaching 2.5 million coastal residents.",
+      "domain": "Disaster Management & AI",
+      "technologies": ["Python", "Scikit-Learn", "Celery", "Redis", "TimescaleDB"],
+      "value_bdt": 30000000.0,
+      "value_usd": 250000.0,
+      "completion_year": 2024,
+      "duration_months": 12
+    },
+    {
+      "project_id": "PRJ-09",
+      "name": "Secondary Education Assessment & Teacher Evaluation Portal",
+      "client": "Directorate of Secondary and Higher Education (DSHE)",
+      "client_type": "Government",
+      "description": "Cloud-hosted examination assessment engine handling 1.8 million student records, automated report generation, and continuous teacher performance tracking.",
+      "domain": "EdTech & Cloud",
+      "technologies": ["Next.js", "Node.js", "MongoDB", "AWS ECS", "CloudFront"],
+      "value_bdt": 28000000.0,
+      "value_usd": 233333.0,
+      "completion_year": 2024,
+      "duration_months": 12
+    },
+    {
+      "project_id": "PRJ-10",
+      "name": "Digital Micro-Enterprise Credit Rating & Onboarding Engine",
+      "client": "Palli Karma-Sahayak Foundation (PKSF)",
+      "client_type": "Financial Institution",
+      "description": "AI-assisted credit appraisal engine evaluating smallholder business viability, alternative credit scoring, and automated sanction workflows for partner NGOs.",
+      "domain": "Fintech & Data Science",
+      "technologies": ["Python", "XGBoost", "FastAPI", "React", "PostgreSQL"],
+      "value_bdt": 32000000.0,
+      "value_usd": 266667.0,
+      "completion_year": 2025,
+      "duration_months": 14
+    },
+    {
+      "project_id": "PRJ-11",
+      "name": "Multi-Cloud Infrastructure Migration & Cyber Resilience Framework",
+      "client": "Eastern Bank PLC",
+      "client_type": "Banking",
+      "description": "Migrated legacy on-premise infrastructure into hybrid cloud with zero-downtime, automated disaster recovery failover, and CIS benchmarks compliance.",
+      "domain": "Cloud & Infrastructure",
+      "technologies": ["Terraform", "AWS", "Kubernetes", "Vault", "Datadog"],
+      "value_bdt": 22000000.0,
+      "value_usd": 183333.0,
+      "completion_year": 2023,
+      "duration_months": 10
+    },
+    {
+      "project_id": "PRJ-12",
+      "name": "Public Procurement Analytics & Market Intelligence Dashboard",
+      "client": "Central Procurement Technical Unit (CPTU), IMED",
+      "client_type": "Government",
+      "description": "Automated data harvesting and predictive anomaly detection tool tracking tender bidding patterns, price variations, and procurement timelines across ministries.",
+      "domain": "GovTech & Analytics",
+      "technologies": ["Python", "FastAPI", "Apache Superset", "PostgreSQL", "Docker"],
+      "value_bdt": 18000000.0,
+      "value_usd": 150000.0,
+      "completion_year": 2025,
+      "duration_months": 8
+    }
+  ],
+  "certifications": [
+    {
+      "name": "ISO 9001:2015 Quality Management System",
+      "standard_code": "ISO 9001",
+      "issuing_body": "Bureau Veritas",
+      "valid_until": "2027-12-31",
+      "status": "Active"
+    },
+    {
+      "name": "ISO/IEC 27001:2022 Information Security Management System",
+      "standard_code": "ISO 27001",
+      "issuing_body": "BSI Group",
+      "valid_until": "2027-08-31",
+      "status": "Active"
+    },
+    {
+      "name": "ISO/IEC 20000-1:2018 Information Technology Service Management",
+      "standard_code": "ISO 20000",
+      "issuing_body": "TUV SUD",
+      "valid_until": "2026-11-30",
+      "status": "Active"
+    },
+    {
+      "name": "Capability Maturity Model Integration DEV Level 3 (CMMI-DEV v2.0)",
+      "standard_code": "CMMI Level 3",
+      "issuing_body": "CMMI Institute",
+      "valid_until": "2028-03-31",
+      "status": "Active"
+    }
+  ]
+}
