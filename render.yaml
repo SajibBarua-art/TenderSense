@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: tendersense
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        value: sqlite:///./tendersense.db
+      - key: EMBEDDING_PROVIDER
+        value: huggingface
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      - key: HUGGINGFACE_API_KEY
+        sync: false
