@@ -75,43 +75,19 @@ class GroqSummaryWriter(BaseSummaryWriter):
             "max_tokens": 180,
         }
 
-        import time
-
         with httpx.Client(timeout=15.0) as client:
-            max_attempts = 3
-            last_resp = None
-
-            for attempt in range(max_attempts):
+            resp = client.post(self.api_url, json=payload, headers=headers)
+            # If 404 (model not found on current Groq tier), seamlessly retry with active compound-mini
+            if resp.status_code == 404 and self.model != "groq/compound-mini":
+                logger.warning(
+                    "Groq model '%s' returned 404 (model not found). Seamlessly retrying with 'groq/compound-mini'...",
+                    self.model
+                )
+                payload["model"] = "groq/compound-mini"
                 resp = client.post(self.api_url, json=payload, headers=headers)
-                last_resp = resp
 
-                # Handle 404: model not found on current Groq tier -> switch to active groq/compound-mini
-                if resp.status_code == 404 and payload["model"] != "groq/compound-mini":
-                    logger.warning(
-                        "Groq model '%s' returned 404. Retrying with 'groq/compound-mini'...",
-                        payload["model"]
-                    )
-                    payload["model"] = "groq/compound-mini"
-                    continue
-
-                # Handle 429: Rate Limit / TPM exceeded -> wait and retry with backoff
-                if resp.status_code == 429:
-                    retry_after = resp.headers.get("retry-after")
-                    wait_sec = float(retry_after) if retry_after else (1.2 * (attempt + 1))
-                    logger.warning(
-                        "Groq 429 Rate Limit encountered (attempt %d/%d). Pausing %.1fs for token bucket refill...",
-                        attempt + 1,
-                        max_attempts,
-                        wait_sec
-                    )
-                    time.sleep(wait_sec)
-                    continue
-
-                # On success or other terminal codes, break
-                break
-
-            last_resp.raise_for_status()
-            data = last_resp.json()
+            resp.raise_for_status()
+            data = resp.json()
             raw_text = data["choices"][0]["message"]["content"].strip()
             # If reasoning model includes <think> tags, extract final answer
             if "</think>" in raw_text:
