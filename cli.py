@@ -25,8 +25,8 @@ def main():
     run_parser.add_argument(
         "--limit",
         type=int,
-        default=20,
-        help="Limit number of tenders to process (default: 20)"
+        default=50,
+        help="Limit number of tenders to process (default: 50)"
     )
     run_parser.add_argument(
         "--format",

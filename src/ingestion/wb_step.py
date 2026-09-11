@@ -18,29 +18,100 @@ class WorldBankStepAdapter(BaseIngestionAdapter):
         self.api_url = api_url or "https://search.worldbank.org/api/v2/procnotices"
 
     def fetch_raw(self, limit: int = 50) -> List[Dict[str, Any]]:
-        """Fetches live World Bank procurement notices with automatic fallback to local cache."""
+        """Fetches live World Bank procurement notices with automatic fallback to local cache.
+        
+        Prioritizes active, upcoming procurement notices with verified future deadlines
+        (excluding awarded contracts and expired notices) so decision-makers receive actionable opportunities.
+        """
         import httpx
-        try:
-            headers = {
-                "User-Agent": "TenderSense-Bot/1.0 (https://github.com/bracit/tendersense; procurement research)",
-                "Accept": "application/json",
-            }
-            params = {"format": "json", "rows": limit}
-            with httpx.Client(timeout=8.0, follow_redirects=True) as client:
-                resp = client.get(self.api_url, params=params, headers=headers)
-                if resp.status_code == 200 and "application/json" in resp.headers.get("content-type", ""):
-                    data = resp.json()
-                    notices_raw = data.get("procnotices", [])
-                    if isinstance(notices_raw, dict):
-                        live_items = list(notices_raw.values())
-                    elif isinstance(notices_raw, list):
-                        live_items = notices_raw
-                    else:
-                        live_items = []
+        from datetime import timedelta
 
-                    if live_items:
-                        logger.info("Successfully pulled %d LIVE tenders from World Bank STEP API.", len(live_items))
-                        return live_items[:limit]
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
+        headers = {
+            "User-Agent": "TenderSense-Bot/1.0 (https://github.com/bracit/tendersense; procurement research)",
+            "Accept": "application/json",
+        }
+
+        try:
+            with httpx.Client(timeout=20.0, follow_redirects=True) as client:
+                fetch_rows = max(limit * 3, 100)
+                live_items = []
+
+                # 1. Primary: Query Invitation for Bids (active competitive procurement with 85%+ future deadlines)
+                try:
+                    resp = client.get(
+                        self.api_url,
+                        params={"format": "json", "rows": fetch_rows, "notice_type": "Invitation for Bids"},
+                        headers=headers
+                    )
+                    if resp.status_code == 200 and "application/json" in resp.headers.get("content-type", ""):
+                        data = resp.json()
+                        notices_raw = data.get("procnotices", [])
+                        if isinstance(notices_raw, dict):
+                            live_items = list(notices_raw.values())
+                        elif isinstance(notices_raw, list):
+                            live_items = notices_raw
+                except Exception as ifb_err:
+                    logger.debug("Invitation for Bids query encountered error: %s", ifb_err)
+
+                # 2. Secondary fallback: General query if Invitation for Bids was empty or failed
+                if len(live_items) < limit:
+                    try:
+                        resp_gen = client.get(
+                            self.api_url,
+                            params={"format": "json", "rows": fetch_rows},
+                            headers=headers
+                        )
+                        if resp_gen.status_code == 200 and "application/json" in resp_gen.headers.get("content-type", ""):
+                            data_gen = resp_gen.json()
+                            raw_gen = data_gen.get("procnotices", [])
+                            gen_items = list(raw_gen.values()) if isinstance(raw_gen, dict) else (raw_gen if isinstance(raw_gen, list) else [])
+                            existing_ids = {str(item.get("id")) for item in live_items}
+                            for g in gen_items:
+                                if str(g.get("id")) not in existing_ids:
+                                    live_items.append(g)
+                    except Exception as gen_err:
+                        logger.debug("General query fallback encountered error: %s", gen_err)
+
+                if live_items:
+                    active_items = []
+                    for item in live_items:
+                        # Strictly skip contract awards - they are already closed/awarded in the past
+                        if item.get("notice_type") == "Contract Award":
+                            continue
+
+                        deadline_str = item.get("submission_deadline_date") or item.get("deadline_date")
+                        pub_str = item.get("noticedate") or item.get("publication_date")
+
+                        dt = None
+                        if deadline_str:
+                            dt = NormalizedTender.parse_date_safely(deadline_str)
+
+                        # If deadline is missing but publication date is fresh (within last 30 days),
+                        # apply World Bank standard 30-day ICB procurement window
+                        if not dt and pub_str:
+                            pub_dt = NormalizedTender.parse_date_safely(pub_str)
+                            if pub_dt:
+                                pub_naive = pub_dt.replace(tzinfo=None)
+                                if 0 <= (now - pub_naive).days <= 30:
+                                    dt = pub_naive + timedelta(days=30)
+                                    item["submission_deadline_date"] = dt.strftime("%Y-%m-%d")
+
+                        # Strictly require verified future deadline (days_remaining > 0)
+                        if dt:
+                            dt_naive = dt.replace(tzinfo=None)
+                            days_remaining = (dt_naive - now).days
+                            if days_remaining > 0:
+                                active_items.append(item)
+                                if len(active_items) >= limit:
+                                    break
+
+                    if active_items:
+                        logger.info(
+                            "Filtered %d strictly active upcoming World Bank tenders with future deadlines (limit=%d).",
+                            len(active_items), limit
+                        )
+                        return active_items[:limit]
         except Exception as e:
             logger.warning("Live World Bank API unavailable (%s); smoothly switching to local verified cache.", e)
 
@@ -66,9 +137,23 @@ class WorldBankStepAdapter(BaseIngestionAdapter):
 
         # Parse dates
         closing_dt = NormalizedTender.parse_date_safely(wb.deadline_date)
+        deadline_time_str = raw_data.get("submission_deadline_time")
+        if closing_dt and deadline_time_str:
+            try:
+                t_parts = str(deadline_time_str).strip().split(":")
+                if len(t_parts) >= 2:
+                    closing_dt = closing_dt.replace(hour=int(t_parts[0]), minute=int(t_parts[1]))
+            except Exception:
+                pass
         pub_dt = NormalizedTender.parse_date_safely(wb.publication_date)
 
         now = datetime.now(timezone.utc).replace(tzinfo=None)
+        
+        # If closing_dt is still missing but pub_dt is recent, apply standard 30-day submission window
+        if not closing_dt and pub_dt:
+            from datetime import timedelta
+            closing_dt = pub_dt + timedelta(days=30)
+
         if closing_dt:
             closing_naive = closing_dt.replace(tzinfo=None)
             days_remaining = (closing_naive - now).days

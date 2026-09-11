@@ -70,7 +70,7 @@ class PipelineRunRequest(BaseModel):
         default="test_dataset",
         description="Data source: 'test_dataset', 'egp_bd', 'world_bank', or 'all'"
     )
-    limit: Optional[int] = Field(default=20, description="Maximum tenders to process (default: 20)")
+    limit: Optional[int] = Field(default=50, description="Maximum tenders to process (default: 50)")
     save_to_shortlist: bool = Field(default=True, description="Whether to persist output to active shortlist")
 
 

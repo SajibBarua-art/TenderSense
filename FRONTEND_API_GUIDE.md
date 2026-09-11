@@ -36,7 +36,7 @@ sequenceDiagram
 
     Note over FE, API: 2. Triggering Ingestion & AI Pipeline
     User->>FE: Select Source ("all") & Click "Run Pipeline"
-    FE->>API: POST /api/v1/pipeline/run { "source": "all", "limit": 20 }
+    FE->>API: POST /api/v1/pipeline/run { "source": "all", "limit": 50 }
     activate API
     API->>Ext: Ingest live tenders (e-GP BD & WB STEP)
     API->>API: Run Rules Engine (Deterministic Eligibility)
@@ -358,11 +358,11 @@ export interface BracITProfile {
   ```json
   {
     "source": "all",
-    "limit": 20,
+    "limit": 50,
     "save_to_shortlist": true
   }
   ```
-  *(Parameters: `source`: `"all"` | `"egp_bd"` | `"world_bank"` | `"test_dataset"`. `limit`: integer, defaults to `20`.)*
+  *(Parameters: `source`: `"all"` | `"egp_bd"` | `"world_bank"` | `"test_dataset"`. `limit`: integer, defaults to `50`.)*
 
 - **Response `200 OK`**:
   ```json

@@ -39,10 +39,10 @@ class IngestionPipeline:
         
         When source='all', distributes the quota evenly (half-and-half round-robin)
         across live portals (e.g. World Bank STEP and e-GP Bangladesh).
-        Defaults to limit=20 if not specified.
+        Defaults to limit=50 if not specified.
         """
         source_key = source.lower()
-        limit_val = limit if limit is not None else 20
+        limit_val = limit if limit is not None else 50
 
         if source_key == "all":
             # Collect results from all external/live feeds (exclude test_dataset)

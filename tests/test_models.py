@@ -104,6 +104,29 @@ def test_world_bank_exact_json_structure():
     assert wb.project_id == "P178544"
 
 
+def test_world_bank_live_api_submission_deadline_mapping():
+    """Validates that live World Bank API payloads map submission_deadline_date as deadline_date."""
+    live_wb_payload = {
+        "id": "OP00467934",
+        "notice_type": "Invitation for Bids",
+        "noticedate": "09-Sep-2026",
+        "submission_deadline_date": "2026-10-07T00:00:00Z",
+        "submission_deadline_time": "10:00",
+        "submission_date": "2026-09-09T00:00:00Z",
+        "project_ctry_name": "Sri Lanka",
+        "project_id": "P170012",
+        "bid_description": "Rehabilitation/ Improvement of 12.10Km of Rural Roads",
+        "procurement_group": "CW",
+        "procurement_method_name": "Request for Bids"
+    }
+
+    wb = WorldBankNotice.model_validate(live_wb_payload)
+    assert wb.id == "OP00467934"
+    assert wb.country_name == "Sri Lanka"
+    assert wb.deadline_date == "2026-10-07T00:00:00Z"
+    assert wb.publication_date == "09-Sep-2026"
+
+
 def test_urgency_level_calculations():
     """Validates urgency classification thresholds."""
     assert NormalizedTender.calculate_urgency(0) == UrgencyLevel.EXPIRED

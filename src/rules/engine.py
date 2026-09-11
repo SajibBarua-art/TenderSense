@@ -266,7 +266,29 @@ class RulesEngine:
 
         # Explicitly allowed tender geographies
         if tender.allowed_geographies:
-            geo_overlap = any(g.lower() in operating_geos for g in tender.allowed_geographies)
+            SOUTH_ASIA = {"bangladesh", "india", "pakistan", "sri lanka", "nepal", "bhutan", "maldives", "afghanistan"}
+            EAST_ASIA_PACIFIC = {"indonesia", "philippines", "vietnam", "thailand", "malaysia", "cambodia", "laos", "myanmar", "fiji", "papua new guinea", "timor-leste", "east asia and pacific"}
+            SUB_SAHARAN_AFRICA = {"kenya", "uganda", "rwanda", "tanzania", "ethiopia", "nigeria", "ghana", "sierra leone", "liberia", "south sudan", "zambia", "malawi", "sub-saharan africa", "africa"}
+
+            geo_overlap = False
+            if "global" in operating_geos or "worldwide" in operating_geos:
+                geo_overlap = True
+            else:
+                for g in tender.allowed_geographies:
+                    g_l = g.lower()
+                    if g_l in operating_geos:
+                        geo_overlap = True
+                        break
+                    if "south asia" in operating_geos and g_l in SOUTH_ASIA:
+                        geo_overlap = True
+                        break
+                    if "east asia and pacific" in operating_geos and g_l in EAST_ASIA_PACIFIC:
+                        geo_overlap = True
+                        break
+                    if "sub-saharan africa" in operating_geos and g_l in SUB_SAHARAN_AFRICA:
+                        geo_overlap = True
+                        break
+
             if not geo_overlap:
                 return (
                     False,

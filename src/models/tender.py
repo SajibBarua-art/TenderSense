@@ -72,12 +72,12 @@ class WorldBankNotice(BaseModel):
     deadline_date: Optional[str] = Field(
         default=None,
         description="Deadline date format",
-        validation_alias=AliasChoices("deadline_date", "submission_date", "deadline")
+        validation_alias=AliasChoices("submission_deadline_date", "deadline_date", "deadline")
     )
     publication_date: Optional[str] = Field(
         default=None,
         description="Publication date format",
-        validation_alias=AliasChoices("publication_date", "noticedate", "published_date")
+        validation_alias=AliasChoices("publication_date", "noticedate", "published_date", "submission_date")
     )
     notice_type: Optional[str] = Field(default=None, validation_alias=AliasChoices("notice_type", "noticetype"))
     procurement_category: Optional[str] = Field(
