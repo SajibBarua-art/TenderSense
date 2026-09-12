@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan context for startup and shutdown routines."""
     logger.info("Initializing TenderSense Backend...")
     try:
-        # Initialize SQLite database schema
+        # Initialize PostgreSQL database schema
         init_db()
 
         # Pre-warm BracIT profile and vector space

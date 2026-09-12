@@ -1,4 +1,4 @@
-"""Tests for SQLite + SQLAlchemy database layer and analytics APIs."""
+"""Tests for SQLAlchemy PostgreSQL database layer and analytics APIs."""
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -12,7 +12,7 @@ from src.orchestration.engine import orchestrator
 
 @pytest.fixture(scope="module")
 def test_db_session():
-    """In-memory SQLite database session for unit testing."""
+    """In-memory database session for unit testing."""
     test_engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
     Base.metadata.create_all(bind=test_engine)
@@ -25,7 +25,7 @@ def test_db_session():
 
 
 def test_database_persistence_and_analytics(test_db_session):
-    """Tests saving a pipeline run to SQLite and aggregating KPIs."""
+    """Tests saving a pipeline run and aggregating KPIs."""
     repo = DatabaseRepository()
 
     # 1. Run pipeline for 3 tenders
@@ -62,32 +62,36 @@ def test_database_persistence_and_analytics(test_db_session):
     assert "urgency_breakdown" in chart_data
 
 
-def test_analytics_api_endpoints():
+def test_analytics_api_endpoints(test_db_session):
     """Verifies that analytics and visualization API endpoints return valid HTTP 200."""
+    from src.db.session import get_db
+    app.dependency_overrides[get_db] = lambda: test_db_session
     client = TestClient(app)
+    try:
+        # 1. Test Overview endpoint
+        resp_ov = client.get("/api/v1/analytics/overview")
+        assert resp_ov.status_code == 200
+        ov_data = resp_ov.json()
+        assert "total_tenders_monitored" in ov_data
+        assert "recommended_bids" in ov_data
 
-    # 1. Test Overview endpoint
-    resp_ov = client.get("/api/v1/analytics/overview")
-    assert resp_ov.status_code == 200
-    ov_data = resp_ov.json()
-    assert "total_tenders_monitored" in ov_data
-    assert "recommended_bids" in ov_data
+        # 2. Test Charts endpoint
+        resp_charts = client.get("/api/v1/analytics/charts")
+        assert resp_charts.status_code == 200
+        charts_data = resp_charts.json()
+        assert "recommendation_donut" in charts_data
+        assert "grade_bar" in charts_data
+        assert "portal_distribution" in charts_data
+        assert "urgency_breakdown" in charts_data
 
-    # 2. Test Charts endpoint
-    resp_charts = client.get("/api/v1/analytics/charts")
-    assert resp_charts.status_code == 200
-    charts_data = resp_charts.json()
-    assert "recommendation_donut" in charts_data
-    assert "grade_bar" in charts_data
-    assert "portal_distribution" in charts_data
-    assert "urgency_breakdown" in charts_data
+        # 3. Test Pipeline runs list endpoint
+        resp_runs = client.get("/api/v1/pipeline/runs")
+        assert resp_runs.status_code == 200
+        assert isinstance(resp_runs.json(), list)
 
-    # 3. Test Pipeline runs list endpoint
-    resp_runs = client.get("/api/v1/pipeline/runs")
-    assert resp_runs.status_code == 200
-    assert isinstance(resp_runs.json(), list)
-
-    # 4. Test Dashboard endpoint
-    resp_dash = client.get("/dashboard")
-    assert resp_dash.status_code == 200
-    assert "TenderSense Executive Command" in resp_dash.text
+        # 4. Test Dashboard endpoint
+        resp_dash = client.get("/dashboard")
+        assert resp_dash.status_code == 200
+        assert "TenderSense Executive Command" in resp_dash.text
+    finally:
+        app.dependency_overrides.clear()

@@ -34,7 +34,7 @@ async def list_pipeline_runs(
     limit: int = Query(default=10, ge=1, le=50, description="Max runs to return"),
     db: Session = Depends(get_db)
 ) -> List[Dict[str, Any]]:
-    """Retrieves paginated historical pipeline execution runs from the SQLite database."""
+    """Retrieves paginated historical pipeline execution runs from the PostgreSQL database."""
     try:
         return db_repository.get_recent_runs(limit=limit, db=db)
     except Exception as e:

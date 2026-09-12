@@ -12,7 +12,7 @@ sequenceDiagram
     actor User as Procurement Officer
     participant FE as Frontend App (React / Vue / Next.js)
     participant API as TenderSense Backend (/api/v1)
-    participant DB as SQLite DB (tendersense.db)
+    participant DB as PostgreSQL DB (Cloud / Neon / Supabase)
     participant Ext as Live Portals (e-GP BD / World Bank)
 
     Note over FE, API: 1. Initial Dashboard Load Flow
@@ -482,7 +482,7 @@ export interface BracITProfile {
 ### Group E: Historical Run Audit
 
 #### `GET /api/v1/pipeline/runs`
-- **Description**: Returns recent pipeline executions stored in SQLite.
+- **Description**: Returns recent pipeline executions stored in PostgreSQL.
 - **Query Parameters**:
   - `limit`: integer (default: `10`, max: `50`)
 - **Response `200 OK`**:

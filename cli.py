@@ -39,14 +39,14 @@ def main():
     run_parser.add_argument(
         "--save",
         action="store_true",
-        help="Persist evaluated tenders and run statistics to SQLite database"
+        help="Persist evaluated tenders and run statistics to PostgreSQL database"
     )
 
     # Command: profile
     subparsers.add_parser("profile", help="Display BracIT capability profile summary")
 
     # Command: history
-    subparsers.add_parser("history", help="List recent pipeline execution runs from SQLite database")
+    subparsers.add_parser("history", help="List recent pipeline execution runs from PostgreSQL database")
 
     args = parser.parse_args()
 
@@ -57,7 +57,7 @@ def main():
             print("\n[TenderSense] No recorded runs found in database.\n")
             return
         print(f"\n{'='*75}")
-        print(f"  TENDERSENSE PIPELINE EXECUTION HISTORY (SQLite)")
+        print(f"  TENDERSENSE PIPELINE EXECUTION HISTORY (PostgreSQL)")
         print(f"{'='*75}")
         print(f"{'RUN ID':<32} {'SOURCE':<14} {'TOTAL':<7} {'BIDS':<6} {'DURATION':<9} {'DATE'}")
         print(f"{'-'*75}")
@@ -100,7 +100,7 @@ def main():
     if save_db:
         from src.db.repository import db_repository
         saved_run = db_repository.save_pipeline_run(shortlist=shortlist, source=source, duration_seconds=duration)
-        print(f"[TenderSense] Saved run '{saved_run.run_id}' to SQLite database.")
+        print(f"[TenderSense] Saved run '{saved_run.run_id}' to PostgreSQL database.")
 
     if output_format == "table":
         print(shortlist_formatter.format_as_table(shortlist))
