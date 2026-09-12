@@ -11,11 +11,18 @@ logger = logging.getLogger(__name__)
 # Base class for SQLAlchemy ORM models
 Base = declarative_base()
 
-# SQLite engine with thread safety for FastAPI
-connect_args = {"check_same_thread": False} if "sqlite" in settings.database_url else {}
+# Normalize database connection URL (e.g. cloud providers often provide 'postgres://' which SQLAlchemy 2.0 requires as 'postgresql://')
+raw_url = settings.database_url
+if raw_url.startswith("postgres://"):
+    raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+
+is_sqlite = "sqlite" in raw_url
+connect_args = {"check_same_thread": False} if is_sqlite else {}
+
 engine = create_engine(
-    settings.database_url,
+    raw_url,
     connect_args=connect_args,
+    pool_pre_ping=True,  # Automatically tests connection vitality before execution (essential for cloud PostgreSQL)
     echo=False
 )
 

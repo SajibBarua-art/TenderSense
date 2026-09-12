@@ -8,7 +8,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: DATABASE_URL
-        value: sqlite:///./tendersense.db
+        sync: false
       - key: EMBEDDING_PROVIDER
         value: huggingface
       - key: LLM_PROVIDER
